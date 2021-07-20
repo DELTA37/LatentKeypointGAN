@@ -16,11 +16,12 @@ def parse_args():
 
 
 @torch.no_grad()
-def test_spade_generator(batch_size=4,
-                         noise_dim=512):
+def test_spade_generator(batch_size=16,
+                         noise_dim=64):
     generator = SPADEGenerator(noise_dim=noise_dim)
     z = torch.randn(batch_size, 3 * noise_dim)
-    out = generator(z)
+    out, latents = generator(z, return_latents=True)
+    print(latents.shape)
     print(out.shape)
 
 
