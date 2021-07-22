@@ -235,10 +235,11 @@ class SPADEGenerator(nn.Module):
                  n_mlp=3,
                  lr_mlp=1e-2):
         super(SPADEGenerator, self).__init__()
-        assert size == 512
+        assert size in [256, 512]
         nf = channel_multiplier
         self.noise_dim = noise_dim
         self.kps_num = kps_num
+        self.size = size
 
         self.input = ConstantInput(128 * nf)
         self.mapping = Mapping(kps_num=kps_num,
@@ -260,8 +261,9 @@ class SPADEGenerator(nn.Module):
                                noise_dim=noise_dim)
         self.up_5 = SPADEBlock(4 * nf, 2 * nf,
                                noise_dim=noise_dim)
-        self.up_6 = SPADEBlock(2 * nf, 3,
-                               noise_dim=noise_dim)
+        if size >= 512:
+            self.up_6 = SPADEBlock(2 * nf, 3,
+                                   noise_dim=noise_dim)
 
     def forward(self, z, return_latents=False):
         z_kp_pose, z_kp_emb, z_bg_emb = torch.split(z, (self.noise_dim, self.noise_dim, self.noise_dim), dim=1)
@@ -280,8 +282,9 @@ class SPADEGenerator(nn.Module):
         x = self.up_4(x, info)  # 128
         x = self.up(x)  # 256
         x = self.up_5(x, info)  # 256
-        x = self.up(x)  # 512
-        x = self.up_6(x, info)  # 512
+        if self.size >= 512:
+            x = self.up(x)  # 512
+            x = self.up_6(x, info)  # 512
         if return_latents:
             return x, torch.cat([info.kp_pos.view(-1, 2 * self.kps_num),
                                  info.kp_emb.view(-1, (self.kps_num + 1) * self.noise_dim)], dim=1)

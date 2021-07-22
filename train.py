@@ -337,11 +337,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--n_sample",
         type=int,
-        default=64,
+        default=16,
         help="number of the samples generated during training",
     )
     parser.add_argument(
-        "--size", type=int, default=512, help="image sizes for the model"
+        "--size", type=int, default=256, help="image sizes for the model"
     )
     parser.add_argument(
         "--r1", type=float, default=10, help="weight of the r1 regularization"
