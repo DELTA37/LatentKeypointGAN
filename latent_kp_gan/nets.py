@@ -257,19 +257,39 @@ class SPADEGenerator(nn.Module):
 
         self.up_0 = SPADEBlock(128 * nf, 64 * nf,
                                noise_dim=noise_dim)
+        self.to_rgb_0 = nn.Conv2d(64 * nf, 3,
+                                  kernel_size=1)
+
         self.up_1 = SPADEBlock(64 * nf, 32 * nf,
                                noise_dim=noise_dim)
+        self.to_rgb_1 = nn.Conv2d(32 * nf, 3,
+                                  kernel_size=1)
+
         self.up_2 = SPADEBlock(32 * nf, 16 * nf,
                                noise_dim=noise_dim)
+        self.to_rgb_2 = nn.Conv2d(16 * nf, 3,
+                                  kernel_size=1)
+
         self.up_3 = SPADEBlock(16 * nf, 8 * nf,
                                noise_dim=noise_dim)
-        self.up_4 = SPADEBlock(8 * nf, 4 * nf if size >= 256 else 3,
+        self.to_rgb_3 = nn.Conv2d(8 * nf, 3,
+                                  kernel_size=1)
+
+        self.up_4 = SPADEBlock(8 * nf, 4 * nf,
                                noise_dim=noise_dim)
-        self.up_5 = SPADEBlock(4 * nf, 2 * nf if size >= 512 else 3,
+        self.to_rgb_4 = nn.Conv2d(4 * nf, 3,
+                                  kernel_size=1)
+
+        self.up_5 = SPADEBlock(4 * nf, 2 * nf,
                                noise_dim=noise_dim)
+        self.to_rgb_5 = nn.Conv2d(2 * nf, 3,
+                                  kernel_size=1)
+
         if size >= 512:
-            self.up_6 = SPADEBlock(2 * nf, 3,
+            self.up_6 = SPADEBlock(2 * nf, nf,
                                    noise_dim=noise_dim)
+            self.to_rgb_6 = nn.Conv2d(nf, 3,
+                                      kernel_size=1)
 
     def parse_latent(self, latent):
         kp_pos, kp_emb = torch.split(latent, (2 * self.kps_num, (self.kps_num + 1) * self.noise_dim), dim=1)
@@ -288,23 +308,30 @@ class SPADEGenerator(nn.Module):
 
         x = self.up(x)  # 8
         x = self.up_0(x, info)  # 8
+        y = self.to_rgb_0(x)
         x = self.up(x)  # 16
         x = self.up_1(x, info)  # 16
+        y = self.up(y) + self.to_rgb_1(x)
         x = self.up(x)  # 32
         x = self.up_2(x, info)  # 32
+        y = self.up(y) + self.to_rgb_2(x)
         x = self.up(x)  # 64
         x = self.up_3(x, info)  # 64
+        y = self.up(y) + self.to_rgb_3(x)
         x = self.up(x)  # 128
         x = self.up_4(x, info)  # 128
+        y = self.up(y) + self.to_rgb_4(x)
         x = self.up(x)  # 256
         x = self.up_5(x, info)  # 256
+        y = self.up(y) + self.to_rgb_5(x)
         if self.size >= 512:
             x = self.up(x)  # 512
             x = self.up_6(x, info)  # 512
+            y = self.up(y) + self.to_rgb_6(x)
 
         if return_latents:
-            return x, latent
-        return x
+            return y, latent
+        return y
 
 
 def make_kernel(k):
