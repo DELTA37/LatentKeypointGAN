@@ -265,7 +265,7 @@ class SPADEGenerator(nn.Module):
             self.up_6 = SPADEBlock(2 * nf, 3,
                                    noise_dim=noise_dim)
 
-    def forward(self, z, return_latents=False):
+    def forward(self, z, return_latents=True):
         z_kp_pose, z_kp_emb, z_bg_emb = torch.split(z, (self.noise_dim, self.noise_dim, self.noise_dim), dim=1)
         info = self.mapping(z_kp_pose, z_kp_emb, z_bg_emb)
         x = self.input(z_kp_pose)  # 4
