@@ -257,9 +257,9 @@ class SPADEGenerator(nn.Module):
                                noise_dim=noise_dim)
         self.up_3 = SPADEBlock(16 * nf, 8 * nf,
                                noise_dim=noise_dim)
-        self.up_4 = SPADEBlock(8 * nf, 4 * nf,
+        self.up_4 = SPADEBlock(8 * nf, 4 * nf if size >= 256 else 3,
                                noise_dim=noise_dim)
-        self.up_5 = SPADEBlock(4 * nf, 2 * nf,
+        self.up_5 = SPADEBlock(4 * nf, 2 * nf if size >= 512 else 3,
                                noise_dim=noise_dim)
         if size >= 512:
             self.up_6 = SPADEBlock(2 * nf, 3,
