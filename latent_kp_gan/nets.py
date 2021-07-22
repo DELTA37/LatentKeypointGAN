@@ -79,7 +79,7 @@ def kp2heatmap(kp_pos,
 
     H = torch.exp(-torch.square(torch.unsqueeze(coords, dim=2) - kp_pos.unsqueeze(3).unsqueeze(3)).sum(dim=1) / sigma)  # bs x kps_num x h x w
     H = torch.cat([H, 1 - torch.max(H, dim=1, keepdim=True).values], dim=1)
-    return H.detach()
+    return H
 
 
 class Mapping(nn.Module):
@@ -126,8 +126,8 @@ class Mapping(nn.Module):
         kp_emb = self.kp_constant_emb * kp_global_emb  # bs x kps_num x 512
         kp_pos = self.kp_pose(z_kp_pose)
         bg_emb = self.bg_style(z_bg_emb).view(-1, 1, self.noise_dim)
-        return Munch(kp_pos=kp_pos,  # bs x 2 x kps_num
-                     kp_emb=torch.cat([kp_emb, bg_emb], dim=1))  # bs x kps_num + 1 x 512
+        return [kp_pos,  # bs x 2 x kps_num
+                torch.cat([kp_emb, bg_emb], dim=1)]  # bs x kps_num + 1 x 512
 
 
 class SPADE(nn.Module):
@@ -164,11 +164,11 @@ class SPADE(nn.Module):
     def forward(self, x, info):
         normalized = self.param_free_norm(x)
         _, _, image_height, image_width = normalized.size()
-        H = kp2heatmap(info.kp_pos,
+        H = kp2heatmap(info[0],
                        image_height=image_height,
                        image_width=image_width,
                        sigma=self.sigma)  # bs x kps_num + 1 x h x w
-        H = (H.unsqueeze(2) * info.kp_emb.unsqueeze(3).unsqueeze(3)).view(-1, (1 + self.kps_num) * self.noise_dim, image_height, image_width)
+        H = (H.unsqueeze(2) * info[1].unsqueeze(3).unsqueeze(3)).view(-1, (1 + self.kps_num) * self.noise_dim, image_height, image_width)
 
         actv = self.mlp_shared(H)
         gamma = self.mlp_gamma(actv)
@@ -286,8 +286,8 @@ class SPADEGenerator(nn.Module):
             x = self.up(x)  # 512
             x = self.up_6(x, info)  # 512
         if return_latents:
-            return x, torch.cat([info.kp_pos.view(-1, 2 * self.kps_num),
-                                 info.kp_emb.view(-1, (self.kps_num + 1) * self.noise_dim)], dim=1)
+            return x, torch.cat([info[0].view(-1, 2 * self.kps_num),
+                                 info[1].view(-1, (self.kps_num + 1) * self.noise_dim)], dim=1)
         return x
 
 
