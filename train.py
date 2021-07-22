@@ -298,6 +298,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                 with torch.no_grad():
                     g_ema.eval()
                     sample, _ = g_ema(sample_z)
+                    os.makedirs("sample", exist_ok=True)
                     utils.save_image(
                         sample,
                         f"sample/{str(i).zfill(6)}.png",
@@ -307,6 +308,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     )
 
             if i % 10000 == 0:
+                os.makedirs("checkpoint", exist_ok=True)
                 torch.save(
                     {
                         "g": g_module.state_dict(),
