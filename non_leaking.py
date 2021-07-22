@@ -6,7 +6,7 @@ from torch.nn import functional as F
 import numpy as np
 
 from distributed import reduce_sum
-from op import upfirdn2d
+from latent_kp_gan.ops import upfirdn2d
 
 
 class AdaptiveAugment:
