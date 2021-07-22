@@ -126,8 +126,14 @@ class Mapping(nn.Module):
         kp_emb = self.kp_constant_emb * kp_global_emb  # bs x kps_num x 512
         kp_pos = self.kp_pose(z_kp_pose)
         bg_emb = self.bg_style(z_bg_emb).view(-1, 1, self.noise_dim)
+        kp_emb = torch.cat([kp_emb, bg_emb], dim=1)
+
+        latent = torch.cat([kp_pos.view(-1, 2 * self.kps_num),
+                            kp_emb.view(-1, (self.kps_num + 1) * self.noise_dim)], dim=1)
+        return latent
+
         return [kp_pos,  # bs x 2 x kps_num
-                torch.cat([kp_emb, bg_emb], dim=1)]  # bs x kps_num + 1 x 512
+                kp_emb]  # bs x kps_num + 1 x 512
 
 
 class SPADE(nn.Module):
@@ -267,7 +273,13 @@ class SPADEGenerator(nn.Module):
 
     def forward(self, z, return_latents=True):
         z_kp_pose, z_kp_emb, z_bg_emb = torch.split(z, (self.noise_dim, self.noise_dim, self.noise_dim), dim=1)
-        info = self.mapping(z_kp_pose, z_kp_emb, z_bg_emb)
+        latent = self.mapping(z_kp_pose, z_kp_emb, z_bg_emb)
+
+        kp_pos, kp_emb = torch.split(latent, (2 * self.kps_num, (self.kps_num + 1) * self.noise_dim), dim=1)
+        kp_pos = kp_pos.view(-1, 2, self.kps_num)
+        kp_emb = kp_emb.view(-1, (self.kps_num + 1), self.noise_dim)
+        info = [kp_pos, kp_emb]
+
         x = self.input(z_kp_pose)  # 4
 
         x = self.up(x)  # 8
@@ -285,9 +297,9 @@ class SPADEGenerator(nn.Module):
         if self.size >= 512:
             x = self.up(x)  # 512
             x = self.up_6(x, info)  # 512
+
         if return_latents:
-            return x, torch.cat([info[0].view(-1, 2 * self.kps_num),
-                                 info[1].view(-1, (self.kps_num + 1) * self.noise_dim)], dim=1)
+            return x, latent
         return x
 
 
