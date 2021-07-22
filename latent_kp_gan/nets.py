@@ -79,8 +79,7 @@ def kp2heatmap(kp_pos,
 
     H = torch.exp(-torch.square(torch.unsqueeze(coords, dim=2) - kp_pos.unsqueeze(3).unsqueeze(3)).sum(dim=1) / sigma)  # bs x kps_num x h x w
     H = torch.cat([H, 1 - torch.max(H, dim=1, keepdim=True).values], dim=1)
-    H.requires_grad_(False)
-    return H
+    return H.detach()
 
 
 class Mapping(nn.Module):
