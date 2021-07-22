@@ -72,8 +72,8 @@ def kp2heatmap(kp_pos,
     :param kp_pos: bs x 2 x kps_num
     :return:
     """
-    y_coords = 2.0 * torch.arange(image_height, dtype=kp_pos.dtype).unsqueeze(1).expand(image_height, image_width) / (image_height - 1.0) - 1.0
-    x_coords = 2.0 * torch.arange(image_width, dtype=kp_pos.dtype).unsqueeze(0).expand(image_height, image_width) / (image_width - 1.0) - 1.0
+    y_coords = 2.0 * torch.arange(image_height, dtype=kp_pos.dtype, device=kp_pos.device).unsqueeze(1).expand(image_height, image_width) / (image_height - 1.0) - 1.0
+    x_coords = 2.0 * torch.arange(image_width, dtype=kp_pos.dtype, device=kp_pos.device).unsqueeze(0).expand(image_height, image_width) / (image_width - 1.0) - 1.0
     coords = torch.stack((y_coords, x_coords), dim=0)
     coords = torch.unsqueeze(coords, dim=0)  # 1 x 2 x h x w
 
