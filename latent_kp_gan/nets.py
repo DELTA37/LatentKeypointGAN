@@ -170,11 +170,11 @@ class SPADE(nn.Module):
     def forward(self, x, info):
         normalized = self.param_free_norm(x)
         _, _, image_height, image_width = normalized.size()
-        H = kp2heatmap(info[0],
+        H = kp2heatmap(info.kp_pos,
                        image_height=image_height,
                        image_width=image_width,
                        sigma=self.sigma)  # bs x kps_num + 1 x h x w
-        H = (H.unsqueeze(2) * info[1].unsqueeze(3).unsqueeze(3)).view(-1, (1 + self.kps_num) * self.noise_dim, image_height, image_width)
+        H = (H.unsqueeze(2) * info.kp_emb.unsqueeze(3).unsqueeze(3)).view(-1, (1 + self.kps_num) * self.noise_dim, image_height, image_width)
 
         actv = self.mlp_shared(H)
         gamma = self.mlp_gamma(actv)
@@ -271,15 +271,19 @@ class SPADEGenerator(nn.Module):
             self.up_6 = SPADEBlock(2 * nf, 3,
                                    noise_dim=noise_dim)
 
-    def forward(self, z, return_latents=True):
-        z_kp_pose, z_kp_emb, z_bg_emb = torch.split(z, (self.noise_dim, self.noise_dim, self.noise_dim), dim=1)
-        latent = self.mapping(z_kp_pose, z_kp_emb, z_bg_emb)
-
+    def parse_latent(self, latent):
         kp_pos, kp_emb = torch.split(latent, (2 * self.kps_num, (self.kps_num + 1) * self.noise_dim), dim=1)
         kp_pos = kp_pos.view(-1, 2, self.kps_num)
         kp_emb = kp_emb.view(-1, (self.kps_num + 1), self.noise_dim)
-        info = [kp_pos, kp_emb]
+        info = Munch(kp_pos=kp_pos,
+                     kp_emb=kp_emb)
+        return info
 
+    def forward(self, z,
+                return_latents=True):
+        z_kp_pose, z_kp_emb, z_bg_emb = torch.split(z, (self.noise_dim, self.noise_dim, self.noise_dim), dim=1)
+        latent = self.mapping(z_kp_pose, z_kp_emb, z_bg_emb)
+        info = self.parse_latent(latent)
         x = self.input(z_kp_pose)  # 4
 
         x = self.up(x)  # 8
