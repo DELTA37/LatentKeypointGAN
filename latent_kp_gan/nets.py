@@ -1,5 +1,6 @@
 import os
 import math
+import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -329,8 +330,18 @@ class SPADEGenerator(nn.Module):
             x = self.up_6(x, info)  # 512
             y = self.up(y) + self.to_rgb_6(x)
 
+        if not self.training:
+            _, _, h, w = y.size()
+            for b in range(y.size(0)):
+                for i in range(self.kps_num):
+                    x_, y_ = info.kp_pos[b, :, i].unbind(0)
+                    x_ = int(w * (x_.item() + 1) / 2)
+                    y_ = int(h * (y_.item() + 1) / 2)
+                    y[b, :, y_ - 5: y_ + 5, x_ - 5: x_ + 5] = torch.from_numpy(np.array([1, 0, 0], dtype=np.float32).reshape((3, 1, 1)))
+
         if return_latents:
             return y, info.kp_emb
+
         return y
 
 
