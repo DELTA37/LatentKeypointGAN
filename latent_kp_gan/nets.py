@@ -265,30 +265,30 @@ class SPADEGenerator(nn.Module):
         self.to_rgb_1 = nn.Conv2d(128 * nf, 3,
                                   kernel_size=1)
 
-        self.up_2 = SPADEBlock(128 * nf, 64 * nf,
+        self.up_2 = SPADEBlock(128 * nf, 128 * nf,
                                noise_dim=noise_dim)
-        self.to_rgb_2 = nn.Conv2d(64 * nf, 3,
+        self.to_rgb_2 = nn.Conv2d(128 * nf, 3,
                                   kernel_size=1)
 
-        self.up_3 = SPADEBlock(64 * nf, 32 * nf,
+        self.up_3 = SPADEBlock(128 * nf, 64 * nf,
                                noise_dim=noise_dim)
-        self.to_rgb_3 = nn.Conv2d(32 * nf, 3,
+        self.to_rgb_3 = nn.Conv2d(64 * nf, 3,
                                   kernel_size=1)
 
-        self.up_4 = SPADEBlock(32 * nf, 16 * nf,
+        self.up_4 = SPADEBlock(64 * nf, 32 * nf,
                                noise_dim=noise_dim)
-        self.to_rgb_4 = nn.Conv2d(16 * nf, 3,
+        self.to_rgb_4 = nn.Conv2d(32 * nf, 3,
                                   kernel_size=1)
 
-        self.up_5 = SPADEBlock(16 * nf, 8 * nf,
+        self.up_5 = SPADEBlock(32 * nf, 16 * nf,
                                noise_dim=noise_dim)
-        self.to_rgb_5 = nn.Conv2d(8 * nf, 3,
+        self.to_rgb_5 = nn.Conv2d(16 * nf, 3,
                                   kernel_size=1)
 
         if size >= 512:
-            self.up_6 = SPADEBlock(8 * nf, 4 * nf,
+            self.up_6 = SPADEBlock(16 * nf, 8 * nf,
                                    noise_dim=noise_dim)
-            self.to_rgb_6 = nn.Conv2d(4 * nf, 3,
+            self.to_rgb_6 = nn.Conv2d(8 * nf, 3,
                                       kernel_size=1)
 
     def parse_latent(self, latent):
