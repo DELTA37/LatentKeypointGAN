@@ -330,7 +330,7 @@ class SPADEGenerator(nn.Module):
             y = self.up(y) + self.to_rgb_6(x)
 
         if return_latents:
-            return y, latent
+            return y, info.kp_emb
         return y
 
 
