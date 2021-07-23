@@ -493,14 +493,14 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
 
         channels = {
-            4: 256,
-            8: 256,
-            16: 256,
-            32: 256,
-            64: 64 * channel_multiplier,
-            128: 32 * channel_multiplier,
-            256: 16 * channel_multiplier,
-            512: 8 * channel_multiplier,
+            4: 128,
+            8: 128,
+            16: 128,
+            32: 128,
+            64: 32 * channel_multiplier,
+            128: 16 * channel_multiplier,
+            256: 8 * channel_multiplier,
+            512: 4 * channel_multiplier,
         }
 
         convs = [ConvLayer(3, channels[size], 1)]
