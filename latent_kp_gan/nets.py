@@ -255,40 +255,40 @@ class SPADEGenerator(nn.Module):
 
         self.up = nn.Upsample(scale_factor=2)
 
-        self.up_0 = SPADEBlock(128 * nf, 64 * nf,
+        self.up_0 = SPADEBlock(128 * nf, 128 * nf,
                                noise_dim=noise_dim)
-        self.to_rgb_0 = nn.Conv2d(64 * nf, 3,
+        self.to_rgb_0 = nn.Conv2d(128 * nf, 3,
                                   kernel_size=1)
 
-        self.up_1 = SPADEBlock(64 * nf, 32 * nf,
+        self.up_1 = SPADEBlock(128 * nf, 128 * nf,
                                noise_dim=noise_dim)
-        self.to_rgb_1 = nn.Conv2d(32 * nf, 3,
+        self.to_rgb_1 = nn.Conv2d(128 * nf, 3,
                                   kernel_size=1)
 
-        self.up_2 = SPADEBlock(32 * nf, 16 * nf,
+        self.up_2 = SPADEBlock(128 * nf, 64 * nf,
                                noise_dim=noise_dim)
-        self.to_rgb_2 = nn.Conv2d(16 * nf, 3,
+        self.to_rgb_2 = nn.Conv2d(64 * nf, 3,
                                   kernel_size=1)
 
-        self.up_3 = SPADEBlock(16 * nf, 8 * nf,
+        self.up_3 = SPADEBlock(64 * nf, 32 * nf,
                                noise_dim=noise_dim)
-        self.to_rgb_3 = nn.Conv2d(8 * nf, 3,
+        self.to_rgb_3 = nn.Conv2d(32 * nf, 3,
                                   kernel_size=1)
 
-        self.up_4 = SPADEBlock(8 * nf, 4 * nf,
+        self.up_4 = SPADEBlock(32 * nf, 16 * nf,
                                noise_dim=noise_dim)
-        self.to_rgb_4 = nn.Conv2d(4 * nf, 3,
+        self.to_rgb_4 = nn.Conv2d(16 * nf, 3,
                                   kernel_size=1)
 
-        self.up_5 = SPADEBlock(4 * nf, 2 * nf,
+        self.up_5 = SPADEBlock(16 * nf, 8 * nf,
                                noise_dim=noise_dim)
-        self.to_rgb_5 = nn.Conv2d(2 * nf, 3,
+        self.to_rgb_5 = nn.Conv2d(8 * nf, 3,
                                   kernel_size=1)
 
         if size >= 512:
-            self.up_6 = SPADEBlock(2 * nf, nf,
+            self.up_6 = SPADEBlock(8 * nf, 4 * nf,
                                    noise_dim=noise_dim)
-            self.to_rgb_6 = nn.Conv2d(nf, 3,
+            self.to_rgb_6 = nn.Conv2d(4 * nf, 3,
                                       kernel_size=1)
 
     def parse_latent(self, latent):
@@ -493,15 +493,14 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
 
         channels = {
-            4: 512,
-            8: 512,
-            16: 512,
-            32: 512,
-            64: 256 * channel_multiplier,
-            128: 128 * channel_multiplier,
-            256: 64 * channel_multiplier,
-            512: 32 * channel_multiplier,
-            1024: 16 * channel_multiplier,
+            4: 128,
+            8: 128,
+            16: 128,
+            32: 128,
+            64: 64 * channel_multiplier,
+            128: 32 * channel_multiplier,
+            256: 16 * channel_multiplier,
+            512: 8 * channel_multiplier,
         }
 
         convs = [ConvLayer(3, channels[size], 1)]
