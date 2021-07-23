@@ -448,7 +448,7 @@ if __name__ == "__main__":
         size=args.size, noise_dim=args.latent // 3, n_mlp=args.n_mlp, channel_multiplier=args.channel_multiplier, kps_num=args.kps_num
     ).to(device)
     discriminator = Discriminator(
-        args.size, channel_multiplier=args.channel_multiplier // 4
+        args.size, channel_multiplier=args.channel_multiplier
     ).to(device)
     g_ema = Generator(
         size=args.size, noise_dim=args.latent // 3, n_mlp=args.n_mlp, channel_multiplier=args.channel_multiplier, kps_num=args.kps_num

@@ -493,10 +493,10 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
 
         channels = {
-            4: 128,
-            8: 128,
-            16: 128,
-            32: 128,
+            4: 256,
+            8: 256,
+            16: 256,
+            32: 256,
             64: 64 * channel_multiplier,
             128: 32 * channel_multiplier,
             256: 16 * channel_multiplier,
